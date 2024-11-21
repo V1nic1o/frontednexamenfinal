@@ -112,7 +112,7 @@ const ProyectoForm = () => {
                         />
                     </label>
                 </div>
-                <button type="submit">Crear Registro</button>
+                <button type="submit">Crear nuevo medicamento</button>
                 <button type="button" onClick={() => window.history.back()}>
                     Cancelar
                 </button>

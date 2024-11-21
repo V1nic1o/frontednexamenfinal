@@ -75,7 +75,7 @@ const TareasPage = () => {
     return (
         <div className="tareas-page">
             <button onClick={() => window.history.back()}>Volver</button>
-            <h2>Lista de Tareas</h2>
+            <h2>Lista de productos</h2>
             <div className="tareas-grid">
                 {tareas.map((tarea) => (
                     <div
