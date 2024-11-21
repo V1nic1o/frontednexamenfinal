@@ -6,10 +6,10 @@ function Home() {
     return (
         <div className="home-container">
             
-            <h2>Listado</h2>
+            <h2>Farmacia</h2>
             <div className="button-container">
-                <button onClick={() => navigate('/create')}>Ingresar y Crear Nueva Tarea</button>
-                <button onClick={() => navigate('/ver-tareas')}>Ver Todas las Tareas</button>
+                <button onClick={() => navigate('/create')}>Ingresar nuevo medicamento</button>
+                <button onClick={() => navigate('/ver-tareas')}>Ver Todas los medicamentos</button>
             </div>
         </div>
     );

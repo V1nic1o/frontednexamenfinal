@@ -6,12 +6,12 @@ const TareasPage = () => {
     const [selectedTarea, setSelectedTarea] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
-    // Simula la obtención de tareas desde la API
+    // Obtener todas las tareas desde el backend
     useEffect(() => {
-        fetch('')
+        fetch('http://localhost:8081/api/to-do/all')
             .then(response => response.json())
             .then(data => setTareas(data))
-            .catch(error => console.error('Error fetching tasks:', error));
+            .catch(error => console.error('Error al obtener las tareas:', error));
     }, []);
 
     const handleTareaClick = (tarea) => {
@@ -32,38 +32,45 @@ const TareasPage = () => {
         setSelectedTarea({ ...selectedTarea, [name]: value });
     };
 
-    const handleUpdate = () => {
-        fetch(`/${selectedTarea.id_proyecto}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(selectedTarea),
-        })
-            .then(response => response.json())
-            .then(data => {
-                setTareas(tareas.map(tarea => tarea.id_proyecto === data.id_proyecto ? data : tarea));
+    const handleUpdate = async () => {
+        try {
+            const response = await fetch(`http://localhost:8081/api/to-do/update/${selectedTarea.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(selectedTarea),
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                setTareas(tareas.map(tarea => tarea.id === result.id ? result : tarea));
                 setIsEditing(false);
-                alert("Tarea actualizada con éxito");
-            })
-            .catch(error => console.error('Error updating task:', error));
+                alert('Registro actualizado con éxito.');
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error al actualizar el registro:', error);
+            alert('Error al actualizar el registro.');
+        }
     };
 
     const handleDeleteTarea = async (tarea) => {
         try {
-            const response = await fetch(`https://examen-final-desarrollo-web-backend.onrender.com/api/to-do/delete/${tarea.id_proyecto}`, {
+            const response = await fetch(`http://localhost:8081/api/to-do/delete/${tarea.id}`, {
                 method: 'DELETE',
             });
             const result = await response.json();
+
             if (response.ok) {
                 alert(result.message);
-                setTareas(tareas.filter((t) => t.id_proyecto !== tarea.id_proyecto));
+                setTareas(tareas.filter((t) => t.id !== tarea.id));
             } else {
                 alert(result.message);
             }
-        }
-        catch (error) {
+        } catch (error) {
             alert('Error al eliminar la tarea.');
         }
-    }
+    };
 
     return (
         <div className="tareas-page">
@@ -72,13 +79,14 @@ const TareasPage = () => {
             <div className="tareas-grid">
                 {tareas.map((tarea) => (
                     <div
-                        key={tarea.id_proyecto}
+                        key={tarea.id}
                         className="tarea-card"
                         onClick={() => handleTareaClick(tarea)}
                     >
-                        <h3>{tarea.titulo}</h3>
-                        <p>Prioridad: {tarea.prioridad}</p>
-                        <p>Vencimiento: {new Date(tarea.fecha_vencimiento).toLocaleDateString()}</p>
+                        <h3>{tarea.nombre}</h3>
+                        <p>Precio: Q{tarea.precio}</p>
+                        <p>Stock: {tarea.stock}</p>
+                        <p>Vencimiento: {tarea.fechaExpiracion ? new Date(tarea.fechaExpiracion).toLocaleDateString() : 'Sin fecha'}</p>
                     </div>
                 ))}
             </div>
@@ -86,16 +94,43 @@ const TareasPage = () => {
             {selectedTarea && (
                 <div className="tarea-detail-overlay" onClick={handleCloseDetail}>
                     <div className="tarea-detail" onClick={(e) => e.stopPropagation()}>
-                        <h2>{selectedTarea.titulo}</h2>
+                        <h2>{selectedTarea.nombre}</h2>
 
                         {isEditing ? (
                             <div>
                                 <label>
-                                    Título:
+                                    Nombre:
                                     <input
                                         type="text"
-                                        name="titulo"
-                                        value={selectedTarea.titulo}
+                                        name="nombre"
+                                        value={selectedTarea.nombre}
+                                        onChange={handleInputChange}
+                                    />
+                                </label>
+                                <label>
+                                    Precio:
+                                    <input
+                                        type="number"
+                                        name="precio"
+                                        value={selectedTarea.precio}
+                                        onChange={handleInputChange}
+                                    />
+                                </label>
+                                <label>
+                                    Stock:
+                                    <input
+                                        type="number"
+                                        name="stock"
+                                        value={selectedTarea.stock}
+                                        onChange={handleInputChange}
+                                    />
+                                </label>
+                                <label>
+                                    Fecha de Expiración:
+                                    <input
+                                        type="date"
+                                        name="fechaExpiracion"
+                                        value={selectedTarea.fechaExpiracion ? new Date(selectedTarea.fechaExpiracion).toISOString().split('T')[0] : ''}
                                         onChange={handleInputChange}
                                     />
                                 </label>
@@ -107,45 +142,6 @@ const TareasPage = () => {
                                         onChange={handleInputChange}
                                     />
                                 </label>
-                                <label>
-                                    Asignado a:
-                                    <input
-                                        type="text"
-                                        name="asignado_a"
-                                        value={selectedTarea.asignado_a}
-                                        onChange={handleInputChange}
-                                    />
-                                </label>
-                                <label>
-                                    Prioridad:
-                                    <select
-                                        name="prioridad"
-                                        value={selectedTarea.prioridad}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="baja">Baja</option>
-                                        <option value="media">Media</option>
-                                        <option value="alta">Alta</option>
-                                    </select>
-                                </label>
-                                <label>
-                                    Fecha de Vencimiento:
-                                    <input
-                                        type="date"
-                                        name="fecha_vencimiento"
-                                        value={new Date(selectedTarea.fecha_vencimiento).toISOString().split('T')[0]}
-                                        onChange={handleInputChange}
-                                    />
-                                </label>
-                                <label>
-                                    Costo del Proyecto:
-                                    <input
-                                        type="number"
-                                        name="costo_proyecto"
-                                        value={selectedTarea.costo_proyecto}
-                                        onChange={handleInputChange}
-                                    />
-                                </label>
                                 <div className="tarea-actions">
                                     <button className="save-button" onClick={handleUpdate}>Guardar</button>
                                     <button className="cancel-button" onClick={() => setIsEditing(false)}>Cancelar</button>
@@ -153,17 +149,13 @@ const TareasPage = () => {
                             </div>
                         ) : (
                             <div>
+                                <p><strong>Precio:</strong> Q{selectedTarea.precio}</p>
+                                <p><strong>Stock:</strong> {selectedTarea.stock}</p>
                                 <p><strong>Descripción:</strong> {selectedTarea.descripcion}</p>
-                                <p><strong>Asignado a:</strong> {selectedTarea.asignado_a}</p>
-                                <p><strong>Prioridad:</strong> {selectedTarea.prioridad}</p>
-                                <p><strong>Fecha de Creación:</strong> {new Date(selectedTarea.fecha_creacion).toLocaleDateString()}</p>
-                                <p><strong>Fecha de Vencimiento:</strong> {new Date(selectedTarea.fecha_vencimiento).toLocaleDateString()}</p>
-                                <p><strong>Costo:</strong> Q{selectedTarea.costo_proyecto}</p>
-                                <p><strong>Pagado:</strong> {selectedTarea.pagado ? 'Sí' : 'No'}</p>
+                                <p><strong>Vencimiento:</strong> {selectedTarea.fechaExpiracion ? new Date(selectedTarea.fechaExpiracion).toLocaleDateString() : 'Sin fecha'}</p>
                                 <div className="tarea-actions">
                                     <button className="edit-button" onClick={handleEditClick}>Editar</button>
                                     <button className="delete-button" onClick={() => handleDeleteTarea(selectedTarea)}>Eliminar</button>
-                                    <button onClick={() => window.history.back()}>Volver</button>
                                 </div>
                             </div>
                         )}

@@ -3,15 +3,12 @@ import './ProyectoForm.css';
 
 const ProyectoForm = () => {
     const [formData, setFormData] = useState({
-        titulo: '',
+        nombre: '',
+        precio: '',
+        stock: 0,
         descripcion: '',
-        completada: false,
-        fecha_vencimiento: '',
-        prioridad: 'media',
-        asignado_a: '',
-        categoria: '',
-        costo_proyecto: '',
-        pagado: false,
+        fechaExpiracion: '',
+        estatusPago: false,
     });
 
     const handleChange = (e) => {
@@ -24,70 +21,101 @@ const ProyectoForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aquí se envían los datos al backend
+
         try {
-            const response = await fetch('', {
+            const response = await fetch('http://localhost:8081/api/to-do/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
             const result = await response.json();
+
             if (response.ok) {
-                alert(result.message);
+                alert('Registro creado con éxito.');
+                setFormData({
+                    nombre: '',
+                    precio: '',
+                    stock: 0,
+                    descripcion: '',
+                    fechaExpiracion: '',
+                    estatusPago: false,
+                });
             } else {
-                alert(result.message);
+                alert(`Error: ${result.message}`);
             }
         } catch (error) {
-            alert('Error al crear el proyecto.');
+            alert('Error al crear el registro.');
         }
     };
 
     return (
         <div className="proyecto-form-container">
-            <h1>Crear Nuevo Proyecto</h1>
+            <h1>Crear Nuevo Registro</h1>
             <form className="proyecto-form" onSubmit={handleSubmit}>
                 <div className="form-column">
                     <label>
-                        Título:
-                        <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
+                        Nombre:
+                        <input
+                            type="text"
+                            name="nombre"
+                            value={formData.nombre}
+                            onChange={handleChange}
+                            required
+                        />
                     </label>
                     <label>
-                        Fecha de vencimiento:
-                        <input type="date" name="fecha_vencimiento" value={formData.fecha_vencimiento} onChange={handleChange} />
+                        Precio:
+                        <input
+                            type="number"
+                            name="precio"
+                            value={formData.precio}
+                            onChange={handleChange}
+                            required
+                        />
                     </label>
                     <label>
-                        Prioridad:
-                        <select name="prioridad" value={formData.prioridad} onChange={handleChange}>
-                            <option value="baja">Baja</option>
-                            <option value="media">Media</option>
-                            <option value="alta">Alta</option>
-                        </select>
+                        Stock:
+                        <input
+                            type="number"
+                            name="stock"
+                            value={formData.stock}
+                            onChange={handleChange}
+                            min="0"
+                        />
                     </label>
                     <label>
-                        Asignado a:
-                        <input type="text" name="asignado_a" value={formData.asignado_a} onChange={handleChange} />
+                        Fecha de Expiración:
+                        <input
+                            type="date"
+                            name="fechaExpiracion"
+                            value={formData.fechaExpiracion}
+                            onChange={handleChange}
+                        />
                     </label>
                 </div>
                 <div className="form-column">
                     <label>
                         Descripción:
-                        <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} />
-                    </label>
-                    <label>
-                        Categoría:
-                        <input type="text" name="categoria" value={formData.categoria} onChange={handleChange} />
-                    </label>
-                    <label>
-                        Costo del proyecto:
-                        <input type="number" name="costo_proyecto" value={formData.costo_proyecto} onChange={handleChange} required />
+                        <textarea
+                            name="descripcion"
+                            value={formData.descripcion}
+                            onChange={handleChange}
+                        />
                     </label>
                     <label className="checkbox">
-                        Pagado:
-                        <input type="checkbox" name="pagado" checked={formData.pagado} onChange={handleChange} />
+                        ¿Pagado?
+                        <input
+                            type="checkbox"
+                            name="estatusPago"
+                            checked={formData.estatusPago}
+                            onChange={handleChange}
+                        />
                     </label>
                 </div>
-                <button type="submit">Crear Proyecto</button>
-                <button type="button" onClick={() => window.history.back()}>Cancelar</button>
+                <button type="submit">Crear Registro</button>
+                <button type="button" onClick={() => window.history.back()}>
+                    Cancelar
+                </button>
             </form>
         </div>
     );
